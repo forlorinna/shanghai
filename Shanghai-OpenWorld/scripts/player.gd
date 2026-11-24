@@ -1,6 +1,6 @@
 extends CharacterBody3D
 
-const Citizen = preload("res://assets/characters/citizen.gd")
+const Citizen = preload("res://assets/characters/protagonist.gd")
 var hero: Node3D
 var capsule: CapsuleShape3D
 var collider: CollisionShape3D

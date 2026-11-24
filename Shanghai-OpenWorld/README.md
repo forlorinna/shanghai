@@ -1,17 +1,17 @@
 # 魔都：自由都市 · Shanghai Open World
 
-V0.2.0 · Godot 4.7.2 · 离线单机 · 简体中文 / English
+V0.4.0 · Godot 4.7.2 · 离线单机 · 简体中文 / English
 
 从陆家嘴出发，可以徒步或开车游览黄浦江两岸。经过延安东路隧道的地面入口时互动，即可驶入依据 OpenStreetMap 线路重建的地下车道。金陵东路渡口与东昌路渡口之间有轮渡。自由探索模式关闭通缉，任何模式都可以跳过任务。
 
 ## 交付文件
 
-- [Android APK](builds/v0.2/android/Shanghai-OpenWorld-v0.2.0-arm64.apk)及 [SHA256](builds/v0.2/android/SHA256SUMS)
-- [Web 静态文件](builds/v0.2/Shanghai-OpenWorld-v0.2.0-web.zip)
-- [Godot 工程、地图源数据与生成工具](builds/v0.2/Shanghai-OpenWorld-v0.2.0-source.zip)
+- [Android APK](builds/v0.4/android/Shanghai-OpenWorld-v0.2.0-arm64.apk)及 [SHA256](builds/v0.4/android/SHA256SUMS)
+- [Web 静态文件](builds/v0.4/Shanghai-OpenWorld-v0.2.0-web.zip)
+- [Godot 工程、地图源数据与生成工具](builds/v0.4/Shanghai-OpenWorld-v0.2.0-source.zip)
 - [开发进度](PROGRESS.md) · [测试报告](TEST_REPORT.md) · [素材与许可证](LICENSES.md) · [签名证书保存](docs/SIGNING.md)
 
-- [V0.2 渲染说明](docs/RENDERING-V0.2.md) · [引擎截图及前后对比](builds/v0.2/Shanghai-OpenWorld-v0.2.0-screenshots.zip)
+- [V0.2 渲染说明](docs/RENDERING-V0.2.md) · [引擎截图及前后对比](builds/v0.4/Shanghai-OpenWorld-v0.2.0-screenshots.zip)
 
 ## 开始游玩
 
@@ -32,11 +32,11 @@ V0.2.0 · Godot 4.7.2 · 离线单机 · 简体中文 / English
 
 在地图点选地标或自定义位置可导航和传送。暂停菜单可手动存档，游戏每 35 秒运行时间自动存档。手机可以接任务、召唤车辆、换色、换装、解锁公寓和拍照。暂停菜单的沙盒页提供时间天气、交通密度、无限资源及摄影选项。
 
-Web 压缩包可部署到静态 HTTPS 目录。可在项目根目录运行以下命令进行本地预览。首次访问需要加载站点资源。HTTPS 或本机回环地址下，浏览器完成 Service Worker 缓存后可以断网重开。同源存档依赖浏览器存储。
+Web 压缩包可部署到静态 HTTPS 目录。可在项目根目录运行以下命令进行V0.2 的本地预览。首次访问需要加载站点资源。HTTPS 或本机回环地址下，浏览器完成 Service Worker 缓存后可以断网重开。同源存档依赖浏览器存储。
 
     python3 -m http.server --bind 127.0.0.1 --directory builds/v0.2/web 8000
 
-V0.2 的 Android 默认走 Vulkan Mobile。设置页有五档画质与独立选项，暂停页有摄影模式。摄影截图保存到应用的 user://photos。覆盖安装沿用 V0.1 的签名与包名，应用数据目录和存档格式保持一致。
+Android 默认走 Vulkan Mobile。V0.4 的重点示范区为陆家嘴环桥及附近街道，已有地图连接到东方明珠。设置页有五档画质与独立选项，暂停页有摄影模式。摄影截图保存到应用的 user://photos。覆盖安装沿用 V0.1 的签名与包名，应用数据目录和存档格式保持一致。
 
 ## 在工程中构建
 

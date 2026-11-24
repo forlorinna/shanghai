@@ -3,6 +3,8 @@ extends Node3D
 const A = preload("res://scripts/art.gd")
 const Car = preload("res://assets/vehicles/vehicle.gd")
 const Citizen = preload("res://assets/characters/citizen.gd")
+const StreetPedestrian = preload("res://assets/characters/protagonist.gd")
+const PREVIEW_ZONE := Rect2(-284, -562, 200, 200)
 const PAINT := [Color("#d4d7d0"), Color("#4d7491"), Color("#866d69"), Color("#637472"), Color("#383e47"), Color("#d3a741")]
 var graph := AStar2D.new()
 var point_ids: Dictionary = {}
@@ -207,8 +209,12 @@ func _spawn(at: Vector3, limit: int, walk: bool) -> void:
 			return
 	var node: Node3D
 	if walk:
-		node = Citizen.new()
-		node.build(randi() % 12)
+		if PREVIEW_ZONE.has_point(p):
+			node = StreetPedestrian.new()
+			node.build(randi() % 4, true)
+		else:
+			node = Citizen.new()
+			node.build(randi() % 12)
 		node.scale = Vector3.ONE * randf_range(0.91, 1.05)
 	else:
 		node = Car.new()

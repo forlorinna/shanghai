@@ -212,7 +212,7 @@ func _title() -> void:
 	col.add_child(_button(t("关于游戏", "About"), func(): open("about")))
 	if not OS.has_feature("web"):
 		col.add_child(_button(t("退出游戏", "Quit"), func(): get_tree().quit(), false, 34))
-	var foot := _label("V0.2.0     •     " + t("黄浦江两岸", "Both banks of the Huangpu"), 13, MUTED)
+	var foot := _label("V0.4.0     •     " + t("黄浦江两岸", "Both banks of the Huangpu"), 13, MUTED)
 	col.add_child(foot)
 	var caption := _panel(content, Color("#0c202dcc"), Color("#6b8d9870"))
 	_set_rect(caption, Vector4(1, 1, 1, 1), Vector4(-346, -78, -14, -14))
@@ -687,7 +687,7 @@ func _sandbox() -> void:
 func _about() -> void:
 	var col := _card(t("关于游戏", "About"), func(): open(parent_screen))
 	for text in [
-		"Shanghai Open World   ·   V0.2.0",
+		"Shanghai Open World   ·   V0.4.0",
 		t("离线单机 · 上海陆家嘴、外滩与黄浦江", "Offline single-player · Lujiazui, the Bund and the Huangpu"),
 		"© OpenStreetMap contributors · ODbL 1.0",
 		"https://www.openstreetmap.org/copyright",

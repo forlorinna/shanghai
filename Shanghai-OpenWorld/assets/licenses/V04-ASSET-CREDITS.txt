@@ -1,0 +1,49 @@
+Shanghai Open World V0.4 — third-party asset notices
+
+BMW M4 Competition M Package — 𝙎𝙍𝙏 𝙋𝙚𝙧𝙛𝙤𝙢𝙖𝙣𝙘𝙚™, CC BY 4.0.
+https://sketchfab.com/3d-models/bmw-m4-competition-m-package-5c0a2dafb1ad408d9fc9eeef9aee531b
+Changes: removed modeled branding and livery submeshes, separated wheel assemblies,
+normalized scale and axes, resized textures, reduced meshes and set gameplay paint/lights.
+
+2024 Tesla Model 3 Highland — RBLXSupercars; credited archive uploader brandonleong28.
+CC BY 4.0. The derivative was recovered from aditano/tesla-studio's credited public copy.
+https://sketchfab.com/3d-models/2024-tesla-model-3-fd22be415215453693d67e33aa7812d0
+https://sketchfab.com/3d-models/tesla-model-3-2024-36c52f3f89f6439c90310f14e8ff33f2
+Changes: metre scale, pivot separation, lower triangle count, palette, clamps on texture size.
+The in-game taxi is a variant of this asset with an application-authored rooftop sign.
+
+2025 Tesla Model Y Juniper — BloxBloger, CC BY-NC 4.0. Personal noncommercial use.
+https://sketchfab.com/3d-models/2025-tesla-model-y-619601e7800d418da5922c4fa7833f74
+Changes from the OBJ: Tesla Studio assigned materials, orientation and wheel groups.
+The game then balanced mesh count/scale and assigned paint, light and wheel controls.
+This asset and its derivatives retain the noncommercial restriction.
+
+Low-Floor City Bus — tevy, CC0 1.0.
+https://tevy.dev/models/city-bus
+Source LOD0/LOD1 imported after converting geometry and Basis textures to compatible formats.
+
+Protagonist and pedestrian — MakeHuman body, rig, skin, garment, hair and other meshes
+released under CC0 1.0 by Data Collection AB, Joel Palmius, Jonas Hauquier in September 2020.
+https://www.makehumancommunity.org/
+https://files.makehumancommunity.org/asset_packs/makehuman_system_assets/makehuman_system_assets_cc0.zip
+Exported using Ara 3D Gen / TuriaArt, with its bundled keyed animations.
+https://github.com/TuriaArt/3d-gen-TU
+The upstream MIT software notice is provided alongside this file.
+
+Poly Haven — Asphalt 02, Precast Stone Paving, Tree Small 02, Street Lamp 01,
+Painted Wooden Bench, Planter Box 01, all CC0 1.0.
+https://polyhaven.com/a/asphalt_02
+https://polyhaven.com/a/precast_stone_paving
+https://polyhaven.com/a/tree_small_02
+https://polyhaven.com/a/street_lamp_01
+https://polyhaven.com/a/painted_wooden_bench
+https://polyhaven.com/a/planter_box_01
+Changes: PBR channels mapped to engine materials; meshes adapted and reduced for real-time use.
+
+Lujiazui ring deck and access centerlines — © OpenStreetMap contributors, ODbL 1.0.
+https://www.openstreetmap.org/way/48876367
+https://www.openstreetmap.org/copyright
+
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/licenses/by-nc/4.0/
+https://creativecommons.org/publicdomain/zero/1.0/

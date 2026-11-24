@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const A = preload("res://scripts/art.gd")
+const Imported = preload("res://assets/vehicles/imported_vehicle.gd")
 const Art = preload("res://assets/vehicles/vehicle_art.gd")
 const TYPES := ["sedan", "suv", "sports", "taxi", "bus", "motorcycle", "police"]
 const SIZES := [
@@ -20,6 +21,11 @@ var integrity := 100.0
 var shell := Node3D.new()
 var wheels: Array[Node3D] = []
 var wheel_rest: Array[Vector3] = []
+var imported := false
+var wheel_spinning: Array[Node3D] = []
+var sedan_paint: StandardMaterial3D
+var model_headlights: Array[BaseMaterial3D] = []
+var model_brakelights: Array[BaseMaterial3D] = []
 var suspension_clocks := 0.0
 var body_pitch := 0.0
 var headlamps: Array[MeshInstance3D] = []
@@ -51,7 +57,9 @@ func create(context, model: int, color: Color, is_traffic := false, stripped := 
 	hit.position.y = shape.size.y * 0.5 + 0.014
 	add_child(hit)
 	add_child(shell)
-	_build(stripped)
+	imported = Imported.mount(self, stripped)
+	if not imported:
+		_build(stripped)
 	if not is_traffic:
 		engine = AudioStreamPlayer3D.new()
 		engine.stream = context.audio.samples.get("motor")
@@ -149,6 +157,9 @@ func _build(stripped: bool) -> void:
 
 func repaint(color: Color) -> void:
 	paint = color
+	if imported:
+		Imported.repaint(self)
+		return
 	var surface := Art.finish(paint,0,(100.0-integrity)*.01)
 	for panel in body_panels:
 		panel.material_override = surface
@@ -176,6 +187,9 @@ func use_driver(value: bool) -> void:
 		light.visible = value and game.climate.night > 0.25
 
 func animate_wheels(delta: float, value: float) -> void:
+	if imported:
+		Imported.roll(self, delta, value)
+		return
 	for tire in wheels:
 		tire.rotate_object_local(Vector3.UP, -value * delta * 2.8)
 
@@ -224,7 +238,9 @@ func _physics_process(delta: float) -> void:
 			integrity = maxf(0, integrity - impact * 1.8)
 			game.feedback("crash_heavy" if impact > 8.0 else "crash", global_position)
 			game.collision_offence(impact, get_last_slide_collision().get_collider())
-			if impact > 8.0 and not body_panels.is_empty():
+			if impact > 8.0 and imported:
+				Imported.repaint(self)
+			elif impact > 8.0 and not body_panels.is_empty():
 				body_panels[0].scale.x = maxf(0.88, body_panels[0].scale.x - impact * 0.0016)
 				body_panels[0].material_override = Art.finish(paint,0,(100.0-integrity)*.01)
 			cooldown = 0.6
@@ -268,7 +284,11 @@ func _sample_suspension(delta: float) -> void:
 		var params := PhysicsRayQueryParameters3D.create(at + Vector3.UP * 0.65, at - Vector3.UP * 0.67, 1)
 		var ground := get_world_3d().direct_space_state.intersect_ray(params)
 		var lift := -0.15 if ground.is_empty() else clampf(float(ground.position.y) - global_position.y, -0.16, 0.16)
-		tire.position.y = lerpf(tire.position.y, rest.y + lift, 1.0 - exp(-delta * 16.0))
+		var target_y := rest.y + lift
+		if imported:
+			var coordinates := tire.get_parent_node_3d().to_local(shell.to_global(Vector3(rest.x, target_y, rest.z)))
+			target_y = coordinates.y
+		tire.position.y = lerpf(tire.position.y, target_y, 1.0 - exp(-delta * 16.0))
 		if rest.z < 0:
 			front_height += lift
 		else:
@@ -278,6 +298,11 @@ func _sample_suspension(delta: float) -> void:
 
 func _lights(braking: bool, left: bool, right: bool) -> void:
 	var night: bool = game.climate.night > 0.25
+	if imported:
+		Imported.lighting(self, night, braking, left, right)
+		if light:
+			light.visible = active and (night or game.climate.wetness > .63 or game.in_tunnel)
+		return
 	for lamp in headlamps:
 		lamp.material_override = A.material(Color("#e1effe"), 0.1, 0.4, night)
 	for lamp in rear:

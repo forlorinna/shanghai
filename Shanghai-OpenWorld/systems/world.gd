@@ -1,5 +1,6 @@
 extends Node3D
 
+const Skywalk = preload("res://systems/lujiazui_skywalk.gd")
 const Landmarks = preload("res://assets/landmarks/landmarks.gd")
 const A = preload("res://scripts/art.gd")
 const CHUNK_PATH := "res://maps/chunks/%s.scn"
@@ -11,6 +12,7 @@ var pending: Dictionary = {}
 var keys: Dictionary = {}
 var water: Array[Array] = []
 var landmarks: Node3D
+var skywalk := Skywalk.new()
 var tunnel: PackedVector3Array
 var boat: Node3D
 var ferry_path: PackedVector3Array
@@ -49,6 +51,8 @@ func start() -> void:
 	landmarks.name = "Landmarks"
 	add_child(landmarks)
 	landmarks.build(data.landmarks, data.bridge)
+	add_child(skywalk)
+	skywalk.build()
 	tunnel = _points(data.tunnel, TUNNEL_Y)
 	ferry_path = _points(data.ferry, -0.58)
 	_build_tunnel()

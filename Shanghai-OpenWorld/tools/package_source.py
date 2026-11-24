@@ -4,7 +4,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 root = Path(__file__).resolve().parents[1]
-output = root / 'builds/v0.2/Shanghai-OpenWorld-v0.2.0-source.zip'
+output = root / 'builds/v0.4/Shanghai-OpenWorld-v0.4.0-source.zip'
 required = ['project.godot', 'export_presets.cfg', 'README.md', 'DEVELOPMENT_PLAN.md',
             'PROGRESS.md', 'TEST_REPORT.md', 'LICENSES.md', '.gitignore']
 directories = ['game', 'assets', 'maps', 'scenes', 'scripts', 'systems', 'ui',
@@ -21,7 +21,7 @@ with ZipFile(output, 'w', compression=ZIP_DEFLATED, compresslevel=8) as archive:
         assert file.is_file(), file
         if '__pycache__' in file.parts or file.suffix in ('.pyc', '.p12', '.jks', '.keystore'):
             continue
-        archive.write(file, Path('Shanghai-OpenWorld-v0.2.0') / file.relative_to(root))
+        archive.write(file, Path('Shanghai-OpenWorld-v0.4.0') / file.relative_to(root))
 with ZipFile(output) as archive:
     assert archive.testzip() is None
     members = archive.namelist()

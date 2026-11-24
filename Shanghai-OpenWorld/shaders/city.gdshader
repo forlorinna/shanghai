@@ -5,6 +5,7 @@ global uniform float wetness;
 global uniform float surface_detail;
 global uniform vec3 city_sky_tint;
 uniform int surface_type = 0;
+uniform bool photographic = false;
 uniform sampler2D color_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D material_tex : filter_linear_mipmap, repeat_enable;
@@ -63,6 +64,9 @@ void fragment() {
 	float close_detail = 1.0 - smoothstep(45.0, 210.0, dist);
 	vec3 tex_color = texture(color_tex, coords).rgb;
 	vec3 rma = texture(material_tex, coords).rgb;
+	if (photographic) {
+		rma = vec3(rma.g, rma.r, rma.b);
+	}
 	float broad = noise(world.xz * 0.075);
 	ALBEDO = COLOR.rgb * mix(vec3(0.62), tex_color * 1.28, 0.62);
 	ROUGHNESS = mix(0.68, 0.98, rma.r);
@@ -126,6 +130,10 @@ void fragment() {
 		float puddle = spill * smoothstep(.35,.91,wetness);
 		float film = wetness * (0.75 + 0.25 * seal);
 		ALBEDO = mix(vec3(dot(tex_color,vec3(.2126,.7152,.0722))),tex_color,surface_type == 1 ? .42 : .78) * mix(vec3(.86), COLOR.rgb*1.36, .48) * mix(1.08, 0.71, film) * (1.0 - repair * .16);
+		if (photographic) {
+			float road_value = surface_type == 1 ? .55 : .83;
+			ALBEDO = tex_color * road_value * mix(1.0, .58, film) * (1.0 - repair * .11);
+		}
 		ROUGHNESS = mix(0.73 + 0.22*rma.r, .31 - .19*puddle, film);
 		SPECULAR = mix(.28, .71, film);
 		if (wetness > .32 && dist < 80.0) {

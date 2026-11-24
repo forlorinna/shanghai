@@ -9,6 +9,8 @@ const BUILDING_COLORS := [
 	Color("#8098a3"), Color("#879695"), Color("#8e8c82"), Color("#a1a29a"), Color("#566f82"),
 	Color("#c6ab89"), Color("#aaa092"), Color("#bdad94"), Color("#8e8376"), Color("#b6a898"),
 ]
+const SLICE := Rect2(-284, -562, 200, 200)
+const SLICE_FACADES := ["166125926", "1211163026", "1211163027", "965081037", "965004729", "1211163028"]
 const ROAD_COLORS := [Color("#858686"), Color("#39404a"), Color("#313946"), Color("#2b3440"), Color("#6b7174")]
 var surfaces: Dictionary
 var origin := Vector3.ZERO
@@ -27,8 +29,14 @@ var uv_hint := Vector2.INF
 var street_center := false
 var contact_range := 0.0
 var wall_normal := Vector3.ZERO
+var slice_materials: Dictionary = {}
+var props: Dictionary = {}
 
 func _initialize() -> void:
+	if DisplayServer.get_name() == "headless":
+		push_error("A rendering backend is required to save MultiMesh instance buffers.")
+		quit(1)
+		return
 	for i in range(8):
 		var mat := ShaderMaterial.new()
 		mat.shader = WATER_SHADER if i == 4 else CITY_SHADER
@@ -48,6 +56,40 @@ func _initialize() -> void:
 	distance_mat.shader = CITY_SHADER
 	distance_mat.set_shader_parameter("surface_type", 10)
 	materials.append(distance_mat)
+	for type in [1, 5]:
+		var material := materials[type].duplicate() as ShaderMaterial
+		var texture_name := "asphalt_02" if type == 1 else "precast_stone_paving"
+		var pattern := "res://assets/textures/lujiazui/%s_%s_1k.jpg"
+		material.set_shader_parameter("color_tex", load(pattern % [texture_name, "diff"]))
+		material.set_shader_parameter("normal_tex", load(pattern % [texture_name, "nor_gl"]))
+		material.set_shader_parameter("material_tex", load(pattern % [texture_name, "arm"]))
+		material.set_shader_parameter("photographic", true)
+		slice_materials[type] = materials.size()
+		materials.append(material)
+	for entry in [["frame", .46, .50], ["glass", .43, .24], ["stone", 0.0, .73]]:
+		var material := StandardMaterial3D.new()
+		material.vertex_color_use_as_albedo = true
+		material.metallic = entry[1]
+		material.roughness = entry[2]
+		slice_materials[entry[0]] = materials.size()
+		materials.append(material)
+	for label in ["tree", "lamp", "bench", "planter"]:
+		var asset := (load("res://assets/scenery/lujiazui/%s.glb" % label) as PackedScene).instantiate() as Node3D
+		var part := asset as MeshInstance3D
+		if not part:
+			part = asset.find_children("*", "MeshInstance3D", true, false)[0]
+		var prop_mesh := part.mesh
+		if label == "tree":
+			prop_mesh = prop_mesh.duplicate() as Mesh
+			for index in prop_mesh.get_surface_count():
+				var surface := prop_mesh.surface_get_material(index) as BaseMaterial3D
+				if surface and surface.resource_name.contains("leaves"):
+					var leaves := surface.duplicate() as BaseMaterial3D
+					leaves.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+					leaves.alpha_scissor_threshold = .40
+					prop_mesh.surface_set_material(index, leaves)
+		props[label] = {"mesh":prop_mesh, "transform":part.transform if part != asset else Transform3D.IDENTITY}
+		asset.free()
 	leaf_material = ShaderMaterial.new()
 	leaf_material.shader = TREE_SHADER
 	leaf_material.set_shader_parameter("PlaneLeaf", load("res://assets/textures/pbr/foliage.png"))
@@ -273,15 +315,20 @@ func _building(record: Array, key: String, collision: bool) -> void:
 			var normal := (b - a).cross(Vector3.UP).normalized()
 			wall_u = a.direction_to(b)
 			wall_origin = a
-			_quad(key, a, a + Vector3.UP * height, b + Vector3.UP * height, b,
-				color, normal, collision)
+			if collision and record[0] in SLICE_FACADES and a.distance_to(b) > 2.3:
+				solid.append_array([a-origin, a+Vector3.UP*height-origin, b+Vector3.UP*height-origin,
+					a-origin, b+Vector3.UP*height-origin, b-origin])
+				_panel_facade(a, b, height, normal, color)
+			else:
+				_quad(key, a, a + Vector3.UP * height, b + Vector3.UP * height, b,
+					color, normal, collision)
 			if street_center and collision and a.distance_to(b) > 1.3:
 				var from := a + Vector3.UP*.087
 				var end := b + Vector3.UP*.087
 				wall_normal = normal
 				contact_range = 1.18
 				_quad("Contact",from,end,end+normal*contact_range,from+normal*contact_range,Color.WHITE,Vector3.UP)
-			if street_center and collision and height > 8.0:
+			if street_center and collision and height > 8.0 and record[0] not in SLICE_FACADES:
 				var crevice := normal * .18
 				var width := a.distance_to(b)
 				var yaw := atan2(wall_u.x, wall_u.z)
@@ -302,6 +349,81 @@ func _building(record: Array, key: String, collision: bool) -> void:
 					_quad("details", c, c + Vector3.UP * 0.26, d + Vector3.UP * 0.26, d,
 						color.lightened(0.22), normal)
 
+func _panel_facade(a: Vector3, b: Vector3, height: float, normal: Vector3, color: Color) -> void:
+	var wall := a.direction_to(b)
+	var count := maxi(1, roundi(a.distance_to(b) / (2.35 if style < 2.5 else 3.05)))
+	var step := a.distance_to(b) / count
+	var floors := maxi(1, roundi((height - 4.15) / 3.32))
+	var floor_height := (height-4.15) / floors
+	var stone := color.lightened(.16)
+	var frame := Color("#444d52") if style < 2.5 else Color("#635f59")
+	for column in count:
+		var x := column*step
+		for level in floors+1:
+			var y := 4.15+(level-1)*floor_height if level else 0.0
+			var h := floor_height if level else 4.15
+			var mullion := .105 if style < 2.5 else .24
+			var base := .20 if level == 0 else .51
+			var glass_color := Color("#66818f").lerp(Color("#334b55"), float((column*13+level*17)%11)/11.0)
+			if level == 0:
+				glass_color = glass_color.darkened(.17)
+				_facade_rect("FacadeStone", a, wall, normal, x, y, step, .15, .22, stone)
+			_facade_rect("FacadeGlass", a, wall, normal, x+mullion, y+base, step-mullion*2, h-base-.28, .055, glass_color)
+			_facade_rect("FacadeFrame", a, wall, normal, x, y+base, mullion, h-base-.25, .18, frame)
+			_facade_rect("FacadeFrame", a, wall, normal, x+step-mullion, y+base, mullion, h-base-.25, .18, frame)
+			_facade_rect("FacadeStone", a, wall, normal, x, y+h-.30, step, .30, .25, stone)
+			_facade_rect("FacadeFrame", a, wall, normal, x+step*.55, y+base, .046, h-base-.29, .16, frame)
+			if level:
+				_facade_rect("FacadeStone", a, wall, normal, x, y, step, base+.025, .21, stone.darkened(.13))
+			var reveal_a := a + wall*(x+mullion) + Vector3.UP*(y+base)
+			var reveal_b := a + wall*(x+step-mullion) + Vector3.UP*(y+base)
+			_quad("FacadeFrame", reveal_a+normal*.05, reveal_b+normal*.05,
+				reveal_b+normal*.23, reveal_a+normal*.23, frame, Vector3.UP)
+
+func _facade_rect(key: String, start: Vector3, wall: Vector3, normal: Vector3,
+		x: float, y: float, w: float, h: float, offset: float, color: Color) -> void:
+	var a := start + wall*x + Vector3.UP*y + normal*offset
+	var b := a + wall*w
+	_quad(key,a,a+Vector3.UP*h,b+Vector3.UP*h,b,color,normal)
+
+func _too_close(points: Array, point: Vector2, spacing: float) -> bool:
+	for row: Array in points:
+		if point.distance_squared_to(Vector2(row[0],row[1])) < spacing*spacing:
+			return true
+	return false
+
+func _prop_batch(root: Node3D, label: String, selection: String, items: Array, scale_factor: float, max_distance: float) -> void:
+	if items.is_empty():
+		return
+	var info: Dictionary = props[selection]
+	var mesh := info.mesh as Mesh
+	var center := _batch_anchor(items)
+	var multi := MultiMesh.new()
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.mesh = mesh
+	multi.instance_count = items.size()
+	for i in items.size():
+		var item: Array = items[i]
+		var variation := clampf(item[2], .80, 1.22) if selection == "tree" else 1.0
+		var angle := i * 2.39 if selection == "tree" else float(item[2]) + (PI*.5 if selection in ["bench","planter"] else 0.0)
+		var sizing := scale_factor * variation
+		var height := mesh.get_aabb().size.y
+		if selection == "tree":
+			sizing *= 5.6 / maxf(height, .01)
+		elif selection == "lamp":
+			sizing *= 5.5 / maxf(height, .01)
+		var basis := Basis(Vector3.UP, angle).scaled(Vector3.ONE*sizing)
+		var at := Vector3(item[0],.035,item[1])-origin-center-basis*Vector3(0,mesh.get_aabb().position.y,0)
+		multi.set_instance_transform(i, Transform3D(basis, at)*info.transform)
+	var result := MultiMeshInstance3D.new()
+	result.name = label
+	result.position = center
+	result.multimesh = multi
+	result.visibility_range_end = max_distance
+	result.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(result)
+	result.owner = root
+
 func _attach(root: Node3D, key: String, material: int, begin := 0.0, end := 0.0) -> void:
 	if not surfaces.has(key):
 		return
@@ -309,15 +431,21 @@ func _attach(root: Node3D, key: String, material: int, begin := 0.0, end := 0.0)
 	st.index()
 	var mi := MeshInstance3D.new()
 	mi.name = key
-	if key in ["ground","seabed","roads","footways","lawn","paint","water","Contact","Spill"]:
+	if key in ["ground","seabed","roads","footways","lawn","paint","water","Contact","Spill","SliceDrive","SlicePaved"]:
 		mi.layers = 2
 	mi.mesh = st.commit()
 	mi.material_override = materials[material]
 	mi.visibility_range_begin = begin
 	mi.visibility_range_end = end
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if key in ["buildings", "near_buildings", "StreetDetail"] else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if key in ["buildings", "near_buildings", "StreetDetail", "FacadeFrame", "FacadeStone"] else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mi)
 	mi.owner = root
+
+func _batch_anchor(items: Array) -> Vector3:
+	var sum := Vector3.ZERO
+	for item: Array in items:
+		sum += _point(item, 0, 0)
+	return sum/float(items.size()) - origin
 
 func _batch(root: Node3D, label: String, items: Array, mesh: Mesh, color: Color, height: float, distance_limit: float, begin := 0.0, override: Material = null) -> void:
 	if items.is_empty():
@@ -325,6 +453,7 @@ func _batch(root: Node3D, label: String, items: Array, mesh: Mesh, color: Color,
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.87
+	var center := _batch_anchor(items) if begin > 0 else Vector3.ZERO
 	var multi := MultiMesh.new()
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.mesh = mesh
@@ -333,9 +462,10 @@ func _batch(root: Node3D, label: String, items: Array, mesh: Mesh, color: Color,
 		var item: Array = items[index]
 		var scale_factor: float = item[2] if label != "LampPoles" else 1.0
 		var yaw := float(index % 17) * 0.31 if label.begins_with("Tree") else 0.0
-		multi.set_instance_transform(index, Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale_factor), _point(item, 0, height * scale_factor) - origin))
+		multi.set_instance_transform(index, Transform3D(Basis(Vector3.UP, yaw).scaled(Vector3.ONE * scale_factor), _point(item, 0, height * scale_factor) - origin - center))
 	var mi := MultiMeshInstance3D.new()
 	mi.name = label
+	mi.position = center
 	mi.multimesh = multi
 	mi.material_override = override if override != null else material
 	mi.visibility_range_begin = begin
@@ -359,6 +489,8 @@ func _bake(key: String, data: Dictionary) -> void:
 	for row in data.get("road", []):
 		var rank := int(row[0])
 		var key_name := "footways" if rank in [0, 4] else "roads"
+		if Rect2(Vector2(origin.x,origin.z)-Vector2(128,128), Vector2(256,256)).intersects(SLICE):
+			key_name = "SlicePaved" if key_name == "footways" else "SliceDrive"
 		_flat(row[2], row[1], key_name, Color("#a8a49d") if rank in [0, 4] else ROAD_COLORS[rank].lightened(0.36))
 	for row in data.get("deck", []):
 		_flat(row[1], row[0], "roads", Color("#41454d"), true)
@@ -367,8 +499,18 @@ func _bake(key: String, data: Dictionary) -> void:
 		var b := _point(row, 2, row[4])
 		var side := (b - a).cross(Vector3.UP).normalized() * 0.075
 		_quad("paint", a - side, b - side, b + side, a + side, Color("#ddd9bf"), Vector3.UP)
+	var seats: Array = []
+	var planters: Array = []
 	for row in data.get("street_props", []):
-		_fixture(row)
+		if SLICE.has_point(Vector2(row[0],row[1])) and int(row[3]) in [1,4]:
+			if int(row[3]) == 1:
+				seats.append(row)
+			else:
+				planters.append(row)
+		else:
+			_fixture(row)
+	_prop_batch(root, "BenchAsset", "bench", seats, 1.0, 95.0)
+	_prop_batch(root, "PlanterAsset", "planter", planters, .90, 95.0)
 	for row in data.get("crossings", []):
 		var p := _point(row, 0, .074)
 		var direction := Basis(Vector3.UP, row[2])
@@ -400,6 +542,11 @@ func _bake(key: String, data: Dictionary) -> void:
 	_attach(root, "ground", 2)
 	_attach(root, "roads", 1)
 	_attach(root, "footways", 5)
+	_attach(root, "SliceDrive", slice_materials[1])
+	_attach(root, "SlicePaved", slice_materials[5])
+	_attach(root, "FacadeFrame", slice_materials["frame"])
+	_attach(root, "FacadeGlass", slice_materials["glass"])
+	_attach(root, "FacadeStone", slice_materials["stone"])
 	_attach(root, "lawn", 6)
 	_attach(root, "paint", 7, 0.0, 285.0)
 	_attach(root, "water", 4)
@@ -417,21 +564,43 @@ func _bake(key: String, data: Dictionary) -> void:
 	trunk.rings = 0
 	trunk.radial_segments = 6
 	trunk.height = 3.9
-	_batch(root, "TreeTrunks", data.get("trees", []), trunk, Color("#625b4d"), 1.95, 430.0)
-	_batch(root, "TreeFoliage", data.get("trees", []), foliage, Color.WHITE, 4.85, 155.0, 0.0, leaf_material)
+	var trees: Array = data.get("trees", [])
+	var photo_trees: Array = []
+	var base_trees: Array = []
+	for row: Array in trees:
+		if SLICE.has_point(Vector2(row[0],row[1])):
+			if not _too_close(photo_trees, Vector2(row[0],row[1]), 12.5):
+				photo_trees.append(row)
+		else:
+			base_trees.append(row)
+	_prop_batch(root, "TreePhotographic", "tree", photo_trees, 1.18, 112.0)
+	_batch(root, "TreeTrunks", base_trees, trunk, Color("#625b4d"), 1.95, 430.0)
+	_batch(root, "TreeFoliage", base_trees, foliage, Color.WHITE, 4.85, 155.0, 0.0, leaf_material)
+	_batch(root, "TreeSliceTrunksLOD", photo_trees, trunk, Color("#625b4d"), 1.95, 430.0, 110.0)
 	var canopy := SphereMesh.new()
 	canopy.radial_segments = 7
 	canopy.rings = 4
 	canopy.radius = 1.67
 	canopy.height = 2.9
-	_batch(root, "TreeCrowns", data.get("trees", []), canopy, Color("#445539"), 4.8, 480.0, 150.0)
+	_batch(root, "TreeCrowns", base_trees, canopy, Color("#445539"), 4.8, 480.0, 150.0)
+	_batch(root, "TreeSliceCrownsLOD", photo_trees, canopy, Color("#445539"), 4.8, 480.0, 110.0)
 	var pole := CylinderMesh.new()
 	pole.top_radius = 0.050
 	pole.bottom_radius = 0.11
 	pole.radial_segments = 6
 	pole.rings = 0
 	pole.height = 5.5
-	_batch(root, "LampPoles", data.get("lamps", []), pole, Color("#3b4349"), 2.75, 380.0)
+	var lamps: Array = data.get("lamps", [])
+	var photo_lamps: Array = []
+	var base_lamps: Array = []
+	for row: Array in lamps:
+		if SLICE.has_point(Vector2(row[0],row[1])):
+			photo_lamps.append(row)
+		else:
+			base_lamps.append(row)
+	_prop_batch(root, "LampAssets", "lamp", photo_lamps, 1.0, 160.0)
+	_batch(root, "LampPoles", base_lamps, pole, Color("#3b4349"), 2.75, 380.0)
+	_batch(root, "LampPolesLOD", photo_lamps, pole, Color("#3b4349"), 2.75, 380.0, 157.0)
 	if not solid.is_empty():
 		var body := StaticBody3D.new()
 		body.name = "Geometry"

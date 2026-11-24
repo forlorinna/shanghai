@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build metrically scaled landmark meshes in Blender and export two geometry LODs."""
 import math
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -78,6 +79,31 @@ class Meshes:
 def pearl(m):
     n=48 if m.close else 22
     m.lathe('Limestone',0,0,[(0,29),(1.1,29),(1.2,26.8),(4.8,26.8),(5.0,25.3)],n)
+    if m.close:
+        m.lathe('Plinth',0,0,[(.18,32.4),(.48,32.4),(.70,31.2),(1.04,31.2)],96)
+        m.lathe('Glazing',0,0,[(1.28,27.4),(4.30,27.4)],96)
+        m.lathe('Silver',0,0,[(4.26,28.2),(4.52,28.2),(4.63,27.7)],96)
+        m.lathe('Limestone',0,0,[(4.55,29.3),(4.95,29.3),(5.48,28.1),(5.62,26.2)],96)
+        for panel in range(96):
+            a = (panel+.5)*TAU/96
+            x,z=math.cos(a),math.sin(a)
+            m.beam('Steel',(x*27.61,1.15,z*27.61),(x*27.61,4.43,z*27.61),.065,6)
+            if panel % 12 in (4,5,6,7):
+                m.beam('NightWarm',(x*28.48,4.3,z*28.48),(x*28.48,4.49,z*28.48),.05,5)
+            if panel % 16 == 0:
+                m.beam('Plinth',(x*28.07,.22,z*28.07),(x*28.07,4.52,z*28.07),.315,12)
+        for angle in (-1.57, .51, 2.61):
+            cx, cz = math.cos(angle)*29.6, math.sin(angle)*29.6
+            for side in (-1,1):
+                x,z = cx+side*2.36*math.sin(angle),cz-side*2.36*math.cos(angle)
+                m.beam('Silver',(x,.12,z),(x,3.52,z),.16,8)
+            a = (cx+2.58*math.sin(angle),3.42,cz-2.58*math.cos(angle))
+            b = (cx-2.58*math.sin(angle),3.42,cz+2.58*math.cos(angle))
+            c = (b[0]+math.cos(angle)*3.4,3.33,b[2]+math.sin(angle)*3.4)
+            d = (a[0]+math.cos(angle)*3.4,3.33,a[2]+math.sin(angle)*3.4)
+            m.face('Glazing',a,b,c,d)
+            for start,end in ((a,b),(b,c),(c,d),(d,a)):
+                m.beam('Steel',start,end,.073,6)
     for j in range(3):
         a=TAU*j/3+.2
         x,z=math.cos(a),math.sin(a)
@@ -289,5 +315,7 @@ def save_landmark(name, detail, function):
 
 for name, function in [('pearl',pearl),('shanghai',tower),('jinmao',jinmao),('swfc',wfc),
                        ('convention',convention),('peace',peace),('customs',customs),('bridge',bridge)]:
-    for detail in ('near','far'):
-        save_landmark(name,detail,function)
+    chosen = sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else []
+    if not chosen or name in chosen:
+        for detail in ('near','far'):
+            save_landmark(name,detail,function)

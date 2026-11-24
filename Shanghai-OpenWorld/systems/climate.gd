@@ -27,8 +27,8 @@ func start() -> void:
 	sun = DirectionalLight3D.new()
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 60
-	sun.shadow_bias = .23
-	sun.shadow_normal_bias = 3.4
+	sun.shadow_bias = .10
+	sun.shadow_normal_bias = 1.15
 	sun.shadow_blur = 1.28
 	add_child(sun)
 	environment = Environment.new()
@@ -44,7 +44,7 @@ func start() -> void:
 	environment.ambient_light_sky_contribution = 0.62
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
 	environment.tonemap_white = 4.0
-	environment.tonemap_exposure = 1.04
+	environment.tonemap_exposure = .94
 	environment.adjustment_enabled = true
 	environment.adjustment_saturation = 0.90
 	var world_env := WorldEnvironment.new()
@@ -122,8 +122,8 @@ func tick(game, dt: float, at: Vector3) -> void:
 	update_clock = 0
 	var cloud: float = [0.18, 0.36, 0.70, 0.70, 0.85, 0.65, 0.91][weather]
 	var golden := (1.0 - smoothstep(0.12, 0.56, absf(elevation))) * (1.0 - cloud * 0.72)
-	var top := Color("#4b5773").lerp(Color("#729ac2"), daylight)
-	var horizon := Color("#626b80").lerp(Color("#c9d7dc"), daylight)
+	var top := Color("#4b5773").lerp(Color("#638fc0"), daylight)
+	var horizon := Color("#626b80").lerp(Color("#b7ccd9"), daylight)
 	horizon = horizon.lerp(Color("#ebb988"), golden * smoothstep(-0.16, 0.12, elevation) * 0.50)
 	var current_sky := Vector2i(floori(hour * 8.0), weather)
 	if sky_key != current_sky:
@@ -137,9 +137,9 @@ func tick(game, dt: float, at: Vector3) -> void:
 	var solar_azimuth := atan2(sin(hour_angle), sin(deg_to_rad(31.23)) * cos(hour_angle))
 	sun.rotation = Vector3(-elevation, -solar_azimuth, 0.0)
 	sun.light_color = Color("#fff5e8").lerp(Color("#ffbc83"), golden * 0.77)
-	sun.light_energy = daylight * (1.77 - cloud * 1.2) + flash * 2.75
+	sun.light_energy = daylight * (2.16 - cloud * 1.38) + flash * 2.75
 	environment.ambient_light_color = Color("#9eaac1").lerp(Color("#bfcedf"), daylight)
-	environment.ambient_light_energy = (0.66 + daylight * 0.29 + cloud * 0.04 + flash * 0.65) if not game.inside else 0.48
+	environment.ambient_light_energy = (0.46 + daylight * 0.23 + cloud * 0.24 + flash * 0.65) if not game.inside else 0.48
 	environment.fog_enabled = game.settings.fog_enabled
 	environment.fog_light_color = horizon.darkened(0.26) if not game.in_tunnel else Color("#3a423f")
 	environment.fog_density = (0.0046 if weather == 5 else 0.00028 + cloud * 0.00045) if not game.in_tunnel else 0.0022
@@ -153,6 +153,7 @@ func tick(game, dt: float, at: Vector3) -> void:
 	RenderingServer.global_shader_parameter_set("surface_detail", clampf((0.60 + game.quality * 0.13) * game.settings.texture_detail, 0.35, 1.15))
 	var tint := horizon.srgb_to_linear()
 	RenderingServer.global_shader_parameter_set("city_sky_tint", Vector3(tint.r, tint.g, tint.b))
+	game.world.skywalk.update_lighting(night)
 	game.world.landmarks.update_lod(game.camera.position, game.quality, game.settings.building_detail, 0.09)
 	var view_origin: Vector3 = game.camera.position
 	_update_probe(game, view_origin, 0.09)

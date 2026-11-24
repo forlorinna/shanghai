@@ -26,3 +26,17 @@
 V0.2 的 Blender 地标、车辆车身、角色几何、叶片图集和 Shader 源码为项目原创。公开建筑资料用于核对比例和辨识特征，资料中的图片未打包。[上海市政府东方明珠资料](https://english.shanghai.gov.cn/en-ScenicSpots/20231205/19a5f5184eca45728fd57a4d4c8efc61.html) · [Gensler 上海中心大厦立面资料](https://www.gensler.com/uploads/document/242/file/Shanghai_Tower_Facade_Design_Process_11_10_2011.pdf)
 
 金茂大厦的高度和退台节奏参考设计团队的项目资料。[SOM Jinmao Tower](https://www.som.com/projects/jin-mao-tower/)
+
+## V0.4 写实资产
+
+V0.4 角色、车辆及一部分街景采用独立授权资产。各资源作者、上游链接、修改内容和许可证随 APK 的 [V04-ASSET-CREDITS.txt](assets/licenses/V04-ASSET-CREDITS.txt) 发布。完整签名私钥不属于源码交付物。
+
+| 内容 | 来源 |
+| --- | --- |
+| 跑车 | 𝙎𝙍𝙏 𝙋𝙚𝙧𝙛𝙤𝙢𝙖𝙣𝙘𝙚™，CC BY 4.0，经授权标注的镜像取得 GLB，源文件 SHA256 与镜像记录一致。[作品](https://sketchfab.com/3d-models/bmw-m4-competition-m-package-5c0a2dafb1ad408d9fc9eeef9aee531b) · [镜像署名和哈希](https://github.com/lukaizj/car-mod-saas/blob/main/public/models/ATTRIBUTION.md) |
+| 轿车、出租车 | RBLXSupercars，存档发布者 brandonleong28，CC BY 4.0，采用原 GLB 内嵌的许可及镜像署名。出租车使用相同车身与换色及顶灯。[源文件说明](https://github.com/aditano/tesla-studio/blob/main/public/models/highland/CREDITS.md) |
+| SUV | BloxBloger，CC BY-NC 4.0。保留此限制，适用于本项目的个人非商业用途。[模型](https://sketchfab.com/3d-models/2025-tesla-model-y-619601e7800d418da5922c4fa7833f74) · [镜像署名](https://github.com/aditano/tesla-studio/blob/main/public/models/juniper/CREDITS.md) |
+| 公交车 | tevy，CC0 1.0。解压网格并转换贴图后接入。[模型与许可](https://tevy.dev/models/city-bus) |
+| 主角和示范区行人 | MakeHuman CC0 骨骼、人体、服装及贴图。Ara 3D Gen 导出器附带关键帧动画。[MakeHuman 素材授权](https://github.com/TuriaArt/3d-gen-TU/blob/main/scripts/ASSETS_LICENSE.txt) · [导出器许可](assets/licenses/ARA-3D-GEN-MIT.txt) |
+| 道路、铺砖、树、路灯、长椅、花槽 | Poly Haven CC0 1.0 资源，具体名称见随包署名。[Poly Haven 许可](https://polyhaven.com/license) |
+| 陆家嘴环桥 | OpenStreetMap 闭合中心线及五个出入口线位。钢结构截面、栏杆、铺装及台阶是按公开参考制作的项目近似模型。[OSM 环桥](https://www.openstreetmap.org/way/48876367) · [森大厦公开参考](https://www.mori.co.jp/_mori_assets/files/assets/3f2dbd9a710d4daaaa8451a27e512959/c1dd9429a89e4972a1471e26f019dfec/131029.pdf) |

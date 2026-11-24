@@ -3,7 +3,7 @@ config_version=5
 [application]
 config/name="Shanghai Open World"
 config/description="魔都：自由都市"
-config/version="0.2.0"
+config/version="0.4.0"
 run/main_scene="res://game/main.tscn"
 config/icon="res://assets/textures/icon.png"
 boot_splash/image="res://assets/textures/splash.png"

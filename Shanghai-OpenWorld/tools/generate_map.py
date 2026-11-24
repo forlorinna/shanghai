@@ -56,6 +56,7 @@ WALK = {'footway': 1.8, 'pedestrian': 4.0, 'cycleway': 2.2, 'path': 1.35,
         'steps': 1.8, 'track': 2.8}
 REPLACE = {row[3] for row in LANDMARKS[:6]}
 REPLACE.update(('177998987', '177998982'))
+SKYWALK_GEOMETRY = {'48876367', '104441053', '166125936', '166125933', '166125934', '104441056'}
 
 
 def metre(lon, lat):
@@ -223,7 +224,8 @@ def main():
             width = min(25, max(1.3, float(tags_width[1])))
         altitude = 3.6 if ident == '27498117' else (max(1, layer) * 3.3 if bridge else 0.0)
         is_drive = highway in DRIVE
-        graphics.append((road, width, is_drive, altitude, ident, highway))
+        if ident not in SKYWALK_GEOMETRY:
+            graphics.append((road, width, is_drive, altitude, ident, highway))
         track = roads if is_drive else footways
         for piece in parts(road.intersection(boundary), 'LineString'):
             if piece.length < 8 or bridge:

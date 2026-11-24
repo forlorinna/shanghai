@@ -11,7 +11,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 root = Path(__file__).resolve().parents[1]
-apk = Path(sys.argv[1]) if len(sys.argv) > 1 else root / 'builds/v0.2/android/Shanghai-OpenWorld-v0.2.0-arm64.apk'
+apk = Path(sys.argv[1]) if len(sys.argv) > 1 else root / 'builds/v0.4/android/Shanghai-OpenWorld-v0.4.0-arm64.apk'
 sdk = Path(os.environ.get('ANDROID_SDK_ROOT', root / 'tools/android-sdk'))
 tools = Path(os.environ.get('ANDROID_BUILD_TOOLS', sdk / 'build-tools/36.0.0'))
 
@@ -24,7 +24,7 @@ assert 'APK Signature Scheme v3): true' in signing
 certificate = (root / 'docs/android-release-certificate.sha256').read_text().strip()
 assert f'certificate SHA-256 digest: {certificate}' in signing, 'V0.1 release certificate mismatch'
 badging = query('aapt', 'dump', 'badging', str(apk))
-assert "name='com.shanghai.openworld' versionCode='2' versionName='0.2.0'" in badging
+assert "name='com.shanghai.openworld' versionCode='4' versionName='0.4.0'" in badging
 assert "application-label:'魔都：自由都市'" in badging
 assert "targetSdkVersion:'36'" in badging and "sdkVersion:'24'" in badging
 assert "native-code: 'arm64-v8a'" in badging
@@ -36,12 +36,15 @@ with ZipFile(apk) as pack:
     assert pack.testzip() is None
     names = set(pack.namelist())
     for required in ['AndroidManifest.xml', 'classes.dex', 'assets/project.binary',
-                     'assets/maps/city.json', 'assets/assets.sparsepck',
-                     'assets/maps/chunks/skyline.scn']:
+                     'assets/maps/city.json', 'assets/assets/landmarks/models/lujiazui_skywalk.json', 'assets/assets.sparsepck',
+                     'assets/maps/chunks/skyline.scn', 'assets/assets/licenses/V04-ASSET-CREDITS.txt']:
         assert required in names, required
     chunks = [name for name in names if name.startswith('assets/maps/chunks/') and name.endswith('.scn')]
     assert len(chunks) == 141, len(chunks)
-    assert any(name.endswith('.etc2.ctex') and 'asphalt_albedo' in name for name in names)
+    assert any(name.endswith('.etc2.ctex') and 'asphalt_02_diff_1k' in name for name in names)
+    for model in ['sedan_near', 'suv_near', 'm4_near', 'city_bus_near', 'city_bus_traffic',
+                  'lujiazui_protagonist', 'lujiazui_skywalk']:
+        assert any(f'/{model}.glb-' in name and name.endswith('.scn') for name in names), model
     assert not any(name.endswith(('.p12','.jks','.keystore','/password')) for name in names)
     assert re.search(r'org\.godotengine\.rendering\.method[^\n]*\n\s+A: android:value[^=]*="mobile"', manifest)
     assert "uses-feature-not-required: name='android.hardware.vulkan.level'" in badging

@@ -45,8 +45,8 @@ var reflection: Node
 var still_photo := false
 var photography := Photo.new()
 var yaw := -2.34
-var pitch := -0.06
-var camera_distance := 5.5
+var pitch := -0.24
+var camera_distance := 4.85
 var camera_mode := 0
 var money := 250
 var owned := [0]
@@ -118,7 +118,7 @@ func _ready() -> void:
 	player.hero.visible = false
 	add_child(camera)
 	camera.current = true
-	camera.fov = 72
+	camera.fov = 64
 	camera.near = 0.13
 	rendering.start(self)
 	reflection = Reflection.new()
@@ -229,7 +229,8 @@ func begin(mode: String) -> void:
 	player.style_avatar(outfit)
 	camera_mode = 0
 	yaw = -2.34
-	pitch = -0.06
+	pitch = -0.24
+	player.hero.rotation.y = yaw
 	if saved.has("vehicle") and saved.vehicle.has("model"):
 		var road: Dictionary = streets.spawn_space(pos)
 		var color := Color.from_string(str(saved.vehicle.get("paint", "")), Color("#458b9d"))
@@ -238,7 +239,7 @@ func begin(mode: String) -> void:
 		enter_vehicle(vehicle)
 	else:
 		var road: Dictionary = streets.spawn_space(pos)
-		spawn_car(0, road.pos, road.yaw, Color("#4ba9ad"))
+		spawn_car(0, road.pos, road.yaw, Color("#343e4c"))
 		var shoulder := Basis(Vector3.UP, float(road.yaw)).x * 3.0
 		var parking: Vector3 = road.pos + shoulder + Vector3.UP * 0.12
 		if world.in_bounds(parking) and not world.is_water(parking):
@@ -276,7 +277,7 @@ func summon(model: int) -> void:
 	if not owned.has(model) and not sandbox and model != 3:
 		return
 	var near: Dictionary = streets.spawn_space(focus() + Vector3(6, 0, 7))
-	var car := spawn_car(model, near.pos, near.yaw, Color("#65a9af") if model != 3 else Color("#deb650"))
+	var car := spawn_car(model, near.pos, near.yaw, Color("#5d6671") if model != 3 else Color("#deb650"))
 	notice(bi("车辆已停在附近道路", "Vehicle parked on a nearby street"))
 	set_destination(car.position)
 
@@ -416,7 +417,7 @@ func _camera(delta: float, snap := false) -> void:
 	var car_view: bool = driving != null
 	if car_view and absf(driving.speed) > 5.0 and not flag("steer_left") and not flag("steer_right") and camera_mode == 0:
 		yaw = lerp_angle(yaw, driving.rotation.y, 1.0 - exp(-delta * 0.52))
-	var target := base + Vector3.UP * (2.0 if car_view else 1.57)
+	var target := base + Vector3.UP * (1.88 if car_view else 1.48)
 	if on_ferry:
 		target.y += 2.5
 	var direction := Basis.from_euler(Vector3(pitch, yaw, 0))

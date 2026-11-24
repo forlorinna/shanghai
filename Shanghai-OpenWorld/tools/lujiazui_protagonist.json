@@ -1,0 +1,20 @@
+{
+  "name": "lujiazui_protagonist",
+  "seed": 402,
+  "gender": 1,
+  "age": 0.53,
+  "height": 0.57,
+  "muscle": 0.54,
+  "weight": 0.47,
+  "african": 0,
+  "asian": 0.98,
+  "caucasian": 0.02,
+  "eyes": "browndark",
+  "hair": "short01",
+  "hairColor": "#1d1719",
+  "outfit": "male_casualsuit01",
+  "shoes": "shoes01",
+  "detail": "high",
+  "rig": "game",
+  "animations": true
+}
