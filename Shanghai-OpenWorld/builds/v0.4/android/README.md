@@ -1,6 +1,10 @@
 # Android ARM64 APK 下载
 
-下载以下六个文件到同一个目录。
+[直接下载完整 APK](https://media.githubusercontent.com/media/forlorinna/shanghai/main/Shanghai-OpenWorld/builds/v0.4/android/Shanghai-OpenWorld-v0.4.0-arm64.apk)（约 151 MiB）。
+
+## 分卷下载
+
+如需分卷，下载以下六个文件到同一个目录。
 
 - [APK 第 1 部分](Shanghai-OpenWorld-v0.4.0-arm64.apk.part01?raw=true)
 - [APK 第 2 部分](Shanghai-OpenWorld-v0.4.0-arm64.apk.part02?raw=true)
