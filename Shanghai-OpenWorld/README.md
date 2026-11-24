@@ -8,7 +8,7 @@ V0.4.0 · Godot 4.7.2 · 离线单机 · 简体中文 / English
 
 - [Android APK](builds/v0.4/android/Shanghai-OpenWorld-v0.2.0-arm64.apk)及 [SHA256](builds/v0.4/android/SHA256SUMS)
 - [Web 静态文件](builds/v0.4/Shanghai-OpenWorld-v0.2.0-web.zip)
-- [Godot 工程、地图源数据与生成工具](builds/v0.4/Shanghai-OpenWorld-v0.2.0-source.zip)
+- [V0.4 GitHub 源码归档](builds/v0.4/Shanghai-OpenWorld-v0.2.0-source.zip)
 - [开发进度](PROGRESS.md) · [测试报告](TEST_REPORT.md) · [素材与许可证](LICENSES.md) · [签名证书保存](docs/SIGNING.md)
 
 - [V0.2 渲染说明](docs/RENDERING-V0.2.md) · [引擎截图及前后对比](builds/v0.4/Shanghai-OpenWorld-v0.2.0-screenshots.zip)
