@@ -1,0 +1,50 @@
+config_version=5
+
+[application]
+config/name="Shanghai Open World"
+config/description="魔都：自由都市"
+config/version="0.2.0"
+run/main_scene="res://game/main.tscn"
+config/icon="res://assets/textures/icon.png"
+boot_splash/image="res://assets/textures/splash.png"
+boot_splash/bg_color=Color(0.027, 0.085, 0.133, 1)
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[rendering]
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="mobile"
+renderer/rendering_method.web="gl_compatibility"
+rendering_device/fallback_to_opengl3=true
+textures/default_filters/anisotropic_filtering_level=2
+lights_and_shadows/directional_shadow/size=3072
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/vram_compression/import_etc2_astc=true
+textures/vram_compression/import_s3tc_bptc=true
+
+[shader_globals]
+night={"type":"float","value":0.0}
+wetness={"type":"float","value":0.0}
+water_detail={"type":"float","value":1.0}
+surface_detail={"type":"float","value":1.0}
+city_sky_tint={"type":"vec3","value":Vector3(0.46, 0.56, 0.66)}
+river_reflection={"type":"sampler2D","value":"res://assets/textures/pbr/metal_albedo.jpg"}
+river_reflect_on={"type":"bool","value":false}
+river_eye={"type":"vec3","value":Vector3(0, 0, 0)}
+river_right={"type":"vec3","value":Vector3(1, 0, 0)}
+river_up={"type":"vec3","value":Vector3(0, 1, 0)}
+river_back={"type":"vec3","value":Vector3(0, 0, 1)}
+river_projection={"type":"vec2","value":Vector2(1, 1)}
+
+[physics]
+common/max_physics_steps_per_frame=4
+
+[input_devices]
+pointing/emulate_mouse_from_touch=true
+sensors/enable_accelerometer=true

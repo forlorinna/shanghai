@@ -1,0 +1,12 @@
+.godot/
+__pycache__/
+tools/downloads/
+tools/android-sdk/
+tools/local/
+*.keystore
+*.jks
+builds/
+tools/signing/
+tools/.tmp-*/
+
+*.p12
